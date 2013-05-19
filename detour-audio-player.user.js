@@ -90,7 +90,7 @@ function main() {
         addAudioOverlayToArtistImage(artistImage, audioOverlay);
       };
 
-      var artistName = $(this).find('a').text();
+      var artistName = $(this).find('a:first').text();
       queryItunes($(this), callback, artistName);
     });
   });
