@@ -51,13 +51,20 @@ function main() {
           audioElement.play();
         }, true);
 
-        // Enable play/pause buttons
-        element.find('.play').click(function() {
-          audioElement.play();
-        });
-        element.find('.pause').click(function() {
-          audioElement.pause();
-        });
+        var image = element.parent().find('.list-image')
+
+        image.mouseover(
+          function () {
+            audioElement.play();
+          }
+        );
+
+        image.mouseout(
+          function () {
+            audioElement.pause();
+          }
+        );
+
       };
 
       var artistName = $(this).find('a').text();
