@@ -15,6 +15,7 @@ function addJQuery(callback) {
 }
 
 function main() {
+
   function queryItunes(element, callback, query) {
     $.ajax({
       url:"https://itunes.apple.com/search?term=" + query + "&entity=song",
@@ -28,6 +29,50 @@ function main() {
     });
   }
 
+  function createAudioElementForUrl(url) {
+    var audioElement = document.createElement('audio');
+    audioElement.setAttribute('src', url);
+    $.get();
+    audioElement.addEventListener("load", function() {
+      audioElement.play();
+    }, true);
+    
+    return audioElement;
+  }
+
+  function createOverlayWithAudioElement(audioElement) {
+    var overlay = $("<div class='overlay' style='display:none;background-color:black;opacity:0.7;color:white;height:100%;width:100%;position:absolute;padding-top:44px;font-size:40px;text-align:center;cursor:pointer;'><span>Play</span></div>");
+    overlay.click(function() {
+      if (audioElement.paused == false) {
+          audioElement.pause();
+          overlaySpan = overlay.find('span');
+          overlaySpan.animate({'opacity': 0}, 100, function () {
+            overlaySpan.text('Play');
+          }).animate({'opacity': 1}, 100);
+        } else {
+          audioElement.play();
+          overlaySpan = overlay.find('span');
+          overlaySpan.animate({'opacity': 0}, 100, function () {
+            overlaySpan.text('Pause');
+          }).animate({'opacity': 1}, 100);
+      }
+    });
+
+    return overlay;
+  }
+
+  function addAudioOverlayToArtistImage(artistImage, overlay) {
+    artistImage.prepend(overlay);
+
+    artistImage.hover(function() {
+        artistImage.find('.overlay').stop().fadeIn('fast');
+      }, function() {
+        artistImage.find('.overlay').stop().fadeOut('fast');
+    });
+
+    return artistImage;
+  }
+
   $(document).ready(function() {
     $(".campaign-info").each(function( index ) {
       var callback = function(element, json, query) {
@@ -35,56 +80,22 @@ function main() {
         try {
           previewUrl = json["results"][0]["previewUrl"];
         } catch (e) {
-          console.log('Could not find preview track for query=' + query);
+          console.log('Could not find preview track for query: ' + query);
           return;
         }
 
-        console.log("in callback with json=" + previewUrl + ' and element' + element);
-
-        var audioElement = document.createElement('audio');
-        audioElement.setAttribute('src', previewUrl);
-        $.get();
-        audioElement.addEventListener("load", function() {
-          audioElement.play();
-        }, true);
-
-        var overlay = $("<div class='overlay' style='display:none;background-color:black;opacity:0.7;color:white;height:100%;width:100%;position:absolute;padding-top:44px;font-size:40px;text-align:center;cursor:pointer;'><span>Play</span></div>");
-        overlay.click(function() {
-          if (audioElement.paused == false) {
-              audioElement.pause();
-              overlaySpan = overlay.find('span');
-              overlaySpan.animate({'opacity': 0}, 100, function () {
-                overlaySpan.text('Play');
-              }).animate({'opacity': 1}, 100);
-            } else {
-              audioElement.play();
-              overlaySpan = overlay.find('span');
-              overlaySpan.animate({'opacity': 0}, 100, function () {
-                overlaySpan.text('Pause');
-              }).animate({'opacity': 1}, 100);
-          }
-        });
-
-
-        var image = element.parent().find('.list-image')
-        image.prepend(overlay);
-
-        image.hover(function() {
-            image.find('.overlay').stop().fadeIn('fast');
-          }, function() {
-            image.find('.overlay').stop().fadeOut('fast');
-          });
-
+        var artistImage  = element.parent().find('.list-image');
+        var audioElement = createAudioElementForUrl(previewUrl);
+        var audioOverlay = createOverlayWithAudioElement(audioElement);
+        addAudioOverlayToArtistImage(artistImage, audioOverlay);
       };
 
       var artistName = $(this).find('a').text();
-      
-      // Query iTunes for the current artist name
       queryItunes($(this), callback, artistName);
     });
   });
 
 }
 
-// load jQuery and execute the main function
+// Load jQuery and execute the main function
 addJQuery(main);
