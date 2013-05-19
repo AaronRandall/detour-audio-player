@@ -51,17 +51,28 @@ function main() {
           audioElement.play();
         }, true);
 
+        var overlay = $("<div class='overlay' style='display:none'>Play</div>");
+        overlay.click(function() {
+          if (audioElement.paused == false) {
+              audioElement.pause();
+            } else {
+              audioElement.play();
+          }
+        });
+
+
         var image = element.parent().find('.list-image')
+        image.prepend(overlay);
 
         image.mouseover(
           function () {
-            audioElement.play();
+            image.find('.overlay').css('display','block');
           }
         );
 
         image.mouseout(
           function () {
-            audioElement.pause();
+            image.find('.overlay').css('display','none');
           }
         );
 
