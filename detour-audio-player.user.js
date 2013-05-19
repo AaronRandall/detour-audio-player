@@ -1,4 +1,5 @@
 // ==UserScript==
+// @match https://detour-ldn.songkick.com/
 // @match https://detour-ldn.songkick.com/discover
 // @match https://detour-ldn.songkick.com/leaderboard
 // @match https://detour-ldn.songkick.com/search*
@@ -43,20 +44,25 @@ function main() {
   }
 
   function createOverlayWithAudioElement(audioElement) {
-    var overlay = $("<div class='overlay' style='display:none;background-color:black;opacity:0.7;color:white;height:100%;width:100%;position:absolute;padding-top:44px;font-size:40px;text-align:center;cursor:pointer;'><span>Play</span></div>");
+    var overlay = $(["<div class='overlay' style='display:none;background-color:black;",
+                     "opacity:0.7;color:white;height:100%;width:100%;position:absolute;",
+                     "padding-top:44px;font-size:40px;text-align:center;cursor:pointer;'>",
+                     "<span>Play</span>",
+                     "</div>"].join(''));
+
     overlay.click(function() {
+      overlaySpan = overlay.find('span');
+
       if (audioElement.paused == false) {
-          audioElement.pause();
-          overlaySpan = overlay.find('span');
-          overlaySpan.animate({'opacity': 0}, 100, function () {
-            overlaySpan.text('Play');
-          }).animate({'opacity': 1}, 100);
-        } else {
-          audioElement.play();
-          overlaySpan = overlay.find('span');
-          overlaySpan.animate({'opacity': 0}, 100, function () {
-            overlaySpan.text('Pause');
-          }).animate({'opacity': 1}, 100);
+        audioElement.pause();
+        overlaySpan.animate({'opacity': 0}, 100, function () {
+          overlaySpan.text('Play');
+        }).animate({'opacity': 1}, 100);
+      } else {
+        audioElement.play();
+        overlaySpan.animate({'opacity': 0}, 100, function () {
+          overlaySpan.text('Pause');
+        }).animate({'opacity': 1}, 100);
       }
     });
 
@@ -96,7 +102,6 @@ function main() {
       queryItunes($(this), callback, artistName);
     });
   });
-
 }
 
 // Load jQuery and execute the main function
