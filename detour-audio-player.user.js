@@ -14,7 +14,6 @@ function addJQuery(callback) {
   document.body.appendChild(script);
 }
 
-// the guts of this userscript
 function main() {
   function queryItunes(element, callback, query) {
     $.ajax({
@@ -41,8 +40,6 @@ function main() {
         }
 
         console.log("in callback with json=" + previewUrl + ' and element' + element);
-        element.prepend("<div class='play'>PLAY</div>");
-        element.prepend("<div class='pause'>PAUSE</div>");
 
         var audioElement = document.createElement('audio');
         audioElement.setAttribute('src', previewUrl);
@@ -51,12 +48,20 @@ function main() {
           audioElement.play();
         }, true);
 
-        var overlay = $("<div class='overlay' style='display:none'>Play</div>");
+        var overlay = $("<div class='overlay' style='display:none;background-color:black;opacity:0.7;color:white;height:100%;width:100%;position:absolute;padding-top:44px;font-size:40px;text-align:center;cursor:pointer;'><span>Play</span></div>");
         overlay.click(function() {
           if (audioElement.paused == false) {
               audioElement.pause();
+              overlaySpan = overlay.find('span');
+              overlaySpan.animate({'opacity': 0}, 100, function () {
+                overlaySpan.text('Play');
+              }).animate({'opacity': 1}, 100);
             } else {
               audioElement.play();
+              overlaySpan = overlay.find('span');
+              overlaySpan.animate({'opacity': 0}, 100, function () {
+                overlaySpan.text('Pause');
+              }).animate({'opacity': 1}, 100);
           }
         });
 
@@ -64,22 +69,17 @@ function main() {
         var image = element.parent().find('.list-image')
         image.prepend(overlay);
 
-        image.mouseover(
-          function () {
-            image.find('.overlay').css('display','block');
-          }
-        );
-
-        image.mouseout(
-          function () {
-            image.find('.overlay').css('display','none');
-          }
-        );
+        image.hover(function() {
+            image.find('.overlay').stop().fadeIn('fast');
+          }, function() {
+            image.find('.overlay').stop().fadeOut('fast');
+          });
 
       };
 
       var artistName = $(this).find('a').text();
-
+      
+      // Query iTunes for the current artist name
       queryItunes($(this), callback, artistName);
     });
   });
