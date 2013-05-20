@@ -1,8 +1,8 @@
 // ==UserScript==
-// @match https://detour-ldn.songkick.com/
-// @match https://detour-ldn.songkick.com/discover
-// @match https://detour-ldn.songkick.com/leaderboard
-// @match https://detour-ldn.songkick.com/search*
+// @match https://detour.songkick.com/
+// @match https://detour.songkick.com/discover
+// @match https://detour.songkick.com/leaderboard
+// @match https://detour.songkick.com/search*
 // ==/UserScript==
 
 // a function that loads jQuery and calls a callback function when jQuery has finished loading
