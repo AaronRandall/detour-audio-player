@@ -19,6 +19,7 @@ function addJQuery(callback) {
 
 function main() {
 
+  // Available providers: "Deezer", "iTunes"
   var audioProvider = "Deezer";
 
   function queryItunes(element, callback, query) {
@@ -100,9 +101,15 @@ function main() {
   }
 
   $(document).ready(function() {
+    // Prepend the required div for the Deezer JavaScript API
     $('body').prepend('<div id="dz-root"></div>');
+
+    // Load the Deezer JavaScript API from an SSL connection
     $.getScript("https://raw.github.com/AaronRandall/detour-audio-player/master/dz.js", function(data, textStatus, jqxhr) {
+
+      // For each campaign on the page
       $(".campaign-info").each(function( index ) {
+        // Define the callback, which is responsible for creating an audio overlay
         var callback = function(element, previewUrl, query) {
           var artistImage  = element.parent().find('.list-image');
           var audioElement = createAudioElementForUrl(previewUrl);
@@ -110,9 +117,10 @@ function main() {
           addAudioOverlayToArtistImage(artistImage, audioOverlay);
         };
 
+        // Find the artist for the current campaign
         var artistName = $(this).find('a:first').text();
 
-        console.log("Using audioProvider: " + audioProvider);
+        // Query the selected audio provider service
         switch(audioProvider)
         {
           case "iTunes":
@@ -123,6 +131,7 @@ function main() {
             break;
         }
       });
+
     });
   });
 }
