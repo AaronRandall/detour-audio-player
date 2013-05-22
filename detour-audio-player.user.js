@@ -5,7 +5,7 @@
 // @match https://detour.songkick.com/search*
 // ==/UserScript==
 
-// a function that loads jQuery and calls a callback function when jQuery has finished loading
+// Load jQuery
 function addJQuery(callback) {
   var script = document.createElement("script");
   script.setAttribute("src", "//ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js");
@@ -19,16 +19,34 @@ function addJQuery(callback) {
 
 function main() {
 
+  var audioProvider = "Deezer";
+
   function queryItunes(element, callback, query) {
     $.ajax({
       url:"https://itunes.apple.com/search?term=" + query + "&entity=song",
       dataType: 'jsonp',
       success:function(json){
-        return callback(element,json, query);
+        previewUrl = '';
+        try {
+          previewUrl = json["results"][0]["previewUrl"];
+        } catch (e) {
+          console.log('Could not find preview track for query: ' + query);
+          return;
+        }
+
+        return callback(element, previewUrl, query);
       },
       error:function(){
         console.log("Error for query:" + query);
       },
+    });
+  }
+
+  function queryDeezer(element, callback, query) {
+    DZ.api('/search?q=' + query, function(response){
+      previewUrl = '';
+      previewUrl = response['data'][0]['preview'];
+      return callback(element, previewUrl, query);
     });
   }
 
@@ -82,24 +100,29 @@ function main() {
   }
 
   $(document).ready(function() {
-    $(".campaign-info").each(function( index ) {
-      var callback = function(element, json, query) {
-        previewUrl = '';
-        try {
-          previewUrl = json["results"][0]["previewUrl"];
-        } catch (e) {
-          console.log('Could not find preview track for query: ' + query);
-          return;
+    $('body').prepend('<div id="dz-root"></div>');
+    $.getScript("https://raw.github.com/AaronRandall/detour-audio-player/master/dz.js", function(data, textStatus, jqxhr) {
+      $(".campaign-info").each(function( index ) {
+        var callback = function(element, previewUrl, query) {
+          var artistImage  = element.parent().find('.list-image');
+          var audioElement = createAudioElementForUrl(previewUrl);
+          var audioOverlay = createOverlayWithAudioElement(audioElement);
+          addAudioOverlayToArtistImage(artistImage, audioOverlay);
+        };
+
+        var artistName = $(this).find('a:first').text();
+
+        console.log("Using audioProvider: " + audioProvider);
+        switch(audioProvider)
+        {
+          case "iTunes":
+            queryItunes($(this), callback, artistName);
+            break;
+          case "Deezer":
+            queryDeezer($(this), callback, artistName);
+            break;
         }
-
-        var artistImage  = element.parent().find('.list-image');
-        var audioElement = createAudioElementForUrl(previewUrl);
-        var audioOverlay = createOverlayWithAudioElement(audioElement);
-        addAudioOverlayToArtistImage(artistImage, audioOverlay);
-      };
-
-      var artistName = $(this).find('a:first').text();
-      queryItunes($(this), callback, artistName);
+      });
     });
   });
 }
