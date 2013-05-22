@@ -34,7 +34,6 @@ function main() {
           console.log('Could not find preview track for query: ' + query);
           return;
         }
-
         return callback(element, previewUrl, query);
       },
       error:function(){
@@ -46,7 +45,12 @@ function main() {
   function queryDeezer(element, callback, query) {
     DZ.api('/search?q=' + query, function(response){
       previewUrl = '';
-      previewUrl = response['data'][0]['preview'];
+      try {
+        previewUrl = response['data'][0]['preview'];
+      } catch (e) {
+        console.log('Could not find preview track for query: ' + query);
+        return;
+      }
       return callback(element, previewUrl, query);
     });
   }
